@@ -2,6 +2,9 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* RTL layout rules. Scoped to :root[dir="rtl"], so LTR mode is untouched. */
+@import "./lib/rtl.css";
+
 /* offline-recovery:start */
 .paperclip-offline {
   --offline-background: #171716;

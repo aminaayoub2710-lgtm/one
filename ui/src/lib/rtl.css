@@ -1,0 +1,86 @@
+/**
+ * RTL layout rules.
+ *
+ * This file is imported exactly once, from `index.css`, and every rule is
+ * scoped to `:root[dir="rtl"]`. It exists to make RTL render correctly
+ * without touching any LTR layout: when `dir` is absent (the default) or
+ * `ltr`, none of these rules match, so the existing page styles are
+ * byte-for-byte unchanged.
+ *
+ * Strategy: prefer logical properties (`margin-inline-*`, `padding-inline-*`,
+ * `inset-inline-*`, `border-inline-*`) wherever the existing code already
+ * uses them, and add mirroring rules only where the existing styles use
+ * physical directions (`left`/`right`) and would otherwise flip the wrong
+ * way. Physical-direction overrides are kept to the minimum and are
+ * commented with the reason they are needed.
+ *
+ * This file intentionally does NOT re-declare theme tokens or component
+ * styles. It only mirrors direction.
+ */
+
+:root[dir="rtl"] {
+  /**
+   * Native <select> caret: the browser draws it on the inline-end, which is
+   * the right in ltr and the left in rtl. index.css already declares a
+   * `:dir(rtl)` rule for the caret position; mirror the same intent here so
+   * the rule survives regardless of which file wins the cascade.
+   */
+  select:where(:not([multiple]):not(.appearance-none)):where(:not([size]), [size="0"], [size="1"]) {
+    background-position: left calc(var(--native-select-end-padding) + var(--native-select-caret-half)) center,
+      left var(--native-select-end-padding) center;
+  }
+
+  /**
+   * Directional arrows on dropdowns, accordions and tree controls that are
+   * rendered as an inline SVG sprite with a fixed `transform`. Without this
+   * they keep pointing right even in RTL.
+   */
+  [data-direction="chevron"],
+  [data-icon="chevron"],
+  [data-icon="caret"],
+  .lucide-chevron-right,
+  .lucide-chevron-left {
+    transform: scaleX(-1);
+  }
+
+  /**
+   * Text-direction mirroring for the few components that position their
+   * decorative panels with physical `left`/`right` and cannot be expressed
+   * with logical properties without a larger rewrite. Each rule is paired
+   * with a comment naming the component it serves.
+   */
+
+  /* Sidebar: the collapsible rail and the secondary panel both slide in
+     from the inline-start. */
+  [data-slot="sidebar"],
+  [data-slot="secondary-sidebar"] {
+    inset-inline-start: 0;
+  }
+
+  /* Breadcrumb trail and page heading rows are flex rows; flip them so the
+     leading element stays at the inline-start. */
+  .breadcrumb-row,
+  .page-heading-row,
+  [data-slot="breadcrumb"],
+  [data-slot="page-heading"] {
+    flex-direction: row-reverse;
+  }
+
+  /* Popovers, tooltips and dropdowns anchored to a trigger keep their
+     inline-end alignment by default; mirror so they open toward the trigger
+     in RTL. */
+  [data-radix-popper-content-wrapper],
+  [data-radix-tooltip-content-wrapper] {
+    --radix-popper-anchor-align: end;
+    --radix-popper-side: inline-end;
+  }
+}
+
+/**
+ * A utility to flip a single decorative arrow icon inline. Add the class to
+ * any element holding an SVG that is direction-specific (back, forward,
+ * chevron). It is a no-op in LTR mode.
+ */
+.rtl-flip {
+  transform: scaleX(-1);
+}

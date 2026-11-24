@@ -1,3 +1,4 @@
+
 # Quickstart: single-container Paperclip with embedded database.
 # Copy this file and set the required env vars before running.
 #
@@ -13,12 +14,7 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
-    # Ceiling on processes. The image makes tini PID 1 so orphaned agent
-    # descendants are reaped instead of piling up as zombies; this is the
-    # backstop if something leaks anyway — the container hits its own limit and
-    # dies visibly rather than starving the host of pids.
     pids_limit: 2048
-    # Includes the shared 30s adapter-settlement window and final cleanup.
     stop_grace_period: 90s
     ports:
       - "${PAPERCLIP_PORT:-3100}:3100"
@@ -26,25 +22,22 @@ services:
       HOST: "0.0.0.0"
       PAPERCLIP_HOME: "/paperclip"
 
-      # ── LLM provider keys (at least one is needed for agents to work) ──
+      # LLM provider keys
       OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
       ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
-
-      # ── Deployment settings ──
-      # "authenticated" requires login, "local_trusted" skips auth
+      GOOGLE_GENERATIVE_AI_API_KEY: "${GOOGLE_GENERATIVE_AI_API_KEY:-}"
+      # Deployment settings
       PAPERCLIP_DEPLOYMENT_MODE: "authenticated"
-      # "private" = LAN only, "public" = internet-facing (use with TLS)
       PAPERCLIP_DEPLOYMENT_EXPOSURE: "private"
-      # Base URL users will access the UI at
       PAPERCLIP_PUBLIC_URL: "${PAPERCLIP_PUBLIC_URL:-http://localhost:3100}"
-      # Extra hostnames the instance accepts beyond the public URL host
-      # (LAN or Tailscale aliases), comma-separated; empty means none
       PAPERCLIP_ALLOWED_HOSTNAMES: "${PAPERCLIP_ALLOWED_HOSTNAMES:-}"
 
-      # ── Required secret for session signing (generate with: openssl rand -hex 32) ──
+      # Required secrets
       BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET must be set}"
-      # Independent secret for signed approval-gated tool actions.
       PAPERCLIP_TOOL_ACTION_SIGNING_SECRET: "${PAPERCLIP_TOOL_ACTION_SIGNING_SECRET:-}"
+
     volumes:
-      # Persistent data directory (database, agent workspaces, uploads)
-      - "${PAPERCLIP_DATA_DIR:-../data/docker-paperclip}:/paperclip"
+      - paperclip-data:/paperclip
+
+volumes:
+  paperclip-data:

@@ -20,6 +20,7 @@ import { applyLiveEventFreeQueryDefaults } from "./lib/live-reconcile";
 import { PrimaryAgentProvider } from "./context/PrimaryAgentProvider";
 import { ToastProvider, useToastActions, type ToastInput } from "./context/ToastContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import { DirectionProvider } from "./context/DirectionContext";
 import { DesignSandboxProvider } from "./context/DesignSandboxContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { initPluginBridge } from "./plugins/bridge-init";
@@ -126,7 +127,8 @@ getOrCreatePaperclipReactRoot(window, rootElement).render(
       <QueryClientProvider client={queryClient}>
         <SentryGate />
         <ThemeProvider>
-          <BrowserRouter>
+          <DirectionProvider>
+            <BrowserRouter>
             <CompanyProvider>
               <EditorAutocompleteProvider>
                 <ToastProvider>
@@ -152,6 +154,7 @@ getOrCreatePaperclipReactRoot(window, rootElement).render(
               </EditorAutocompleteProvider>
             </CompanyProvider>
           </BrowserRouter>
+          </DirectionProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </AppErrorBoundary>
